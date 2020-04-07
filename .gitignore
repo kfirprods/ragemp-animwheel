@@ -102,3 +102,7 @@ dist
 
 # TernJS port file
 .tern-port
+client_packages/freeroam
+packages/freeroam
+bt.dat
+conf.json

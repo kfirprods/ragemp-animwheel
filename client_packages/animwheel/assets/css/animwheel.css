@@ -1,0 +1,55 @@
+#wheel-container {
+  position: relative;
+  width: 50vw;
+  height: 50vh;
+  font-family: Arial;
+
+  /* Make text unselectable */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Standard */
+}
+
+.current-category {
+  width: 100%;
+  text-align: center;
+  position: absolute;
+}
+
+.current-category span {
+  color: white;
+  font-weight: 600;
+  font-size: 16pt;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+
+.category-container {
+  border-radius: 50%;
+  background: black;
+  color: white;
+  width: 96px;
+  height: 96px;
+  opacity: 0.3;
+}
+
+.category-container:hover {
+  opacity: 1;
+  border: 4px solid rgb(101, 180, 212);
+  margin: -4px;
+}
+
+.category-name {
+  display: none;
+}
+
+.category-container img {
+  width: 64px;
+  height: 64px;
+  top: 16px;
+  left: 16px;
+  position: absolute;
+
+  /* Invert the color from black to white */
+  filter: invert(1);
+}
