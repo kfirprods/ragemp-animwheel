@@ -13,7 +13,6 @@ function toggleAnimWheel() {
         mp.game.ui.displayRadar(true);
         return;
     }
-    
     animWheelBrowser = mp.browsers.new('package://animwheel/animwheel.html');
 
     mp.gui.cursor.show(true, true);

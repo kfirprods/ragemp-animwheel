@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const KEY_O = 0x4F;
-let animWheelBrowser = null;
+var KEY_O = 0x4F;
+var animWheelBrowser = null;
 function toggleAnimWheel() {
     if (animWheelBrowser != null) {
         animWheelBrowser.destroy();
@@ -17,7 +17,7 @@ function toggleAnimWheel() {
 mp.keys.bind(KEY_O, false, function () {
     toggleAnimWheel();
 });
-mp.events.add('animationItemClicked', (animationKey, animationName, animationFlag) => {
+mp.events.add('animationItemClicked', function (animationKey, animationName, animationFlag) {
     mp.events.callRemote('PLAY_ANIMATION', animationKey, animationName, animationFlag);
 });
 //# sourceMappingURL=index.js.map

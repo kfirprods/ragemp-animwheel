@@ -53,3 +53,15 @@
   /* Invert the color from black to white */
   filter: invert(1);
 }
+
+#loading-spinner {
+    position: fixed;
+    width: 100%;
+    top: 50%;
+    text-align: center;
+}
+
+#loading-spinner svg {
+    width: 100px;
+    height: 100px;
+}

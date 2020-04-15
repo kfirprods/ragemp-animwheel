@@ -43,54 +43,28 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var mysql = __importStar(require("mysql2/promise"));
 var rpc = __importStar(require("rage-rpc"));
-var ragemp_animwheel_types_1 = require("ragemp-animwheel-types");
-var mysqlConnection = mysql.createConnection({
-    // Change this
-    user: 'animwheelAdmin',
-    password: '1234',
-    database: 'sys'
-});
-mysqlConnection.then(function () {
-    console.log('Animwheel MySQL connected');
-}, function (error) {
-    console.log("Animwheel MySQL error: " + error);
-});
-console.log('Animwheel package is running');
-mp.events.add('PLAY_ANIMATION', function (player, animation_key, animation_name, animation_flag) {
-    player.stopAnimation();
-    player.playAnimation(animation_key, animation_name, 1, animation_flag);
-});
-rpc.register('getAnimationCategories', function () { return __awaiter(void 0, void 0, void 0, function () {
-    var db, _a, categoryRows, categoryFields, _b, animationRows, animationFields;
-    return __generator(this, function (_c) {
-        switch (_c.label) {
-            case 0: return [4 /*yield*/, mysqlConnection];
-            case 1:
-                db = _c.sent();
-                return [4 /*yield*/, db.execute("SELECT * FROM animation_categories")];
-            case 2:
-                _a = _c.sent(), categoryRows = _a[0], categoryFields = _a[1];
-                return [4 /*yield*/, db.execute("SELECT * FROM animations")];
-            case 3:
-                _b = _c.sent(), animationRows = _b[0], animationFields = _b[1];
-                // @ts-ignore
-                return [2 /*return*/, categoryRows.map(function (categoryRow) {
-                        return new ragemp_animwheel_types_1.AnimationCategory(categoryRow.Name, categoryRow.IconFilePath, 
-                        // @ts-ignore
-                        animationRows.filter(function (animationRow) { return animationRow.CategoryName === categoryRow.Name; }).map(function (animationRow) {
-                            return new ragemp_animwheel_types_1.Animation(animationRow.DisplayName, animationRow.IconFilePath, animationRow.RageDictKey, animationRow.RageDictName, animationRow.Flag);
-                        }));
-                    })];
-        }
-    });
-}); });
-rpc.register('playAnimation', function (animation, info) { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        info.player.stopAnimation();
-        info.player.playAnimation(animation.rageDictKey, animation.rageDictValue, 1, animation.flag);
-        return [2 /*return*/];
-    });
-}); });
-//# sourceMappingURL=index.js.map
+var RageRpcAnimationDataProvider = /** @class */ (function () {
+    function RageRpcAnimationDataProvider() {
+    }
+    RageRpcAnimationDataProvider.prototype.getCategories = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var categories;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, rpc.callServer('getAnimationCategories')];
+                    case 1:
+                        categories = _a.sent();
+                        alert(categories.length + " categories");
+                        return [2 /*return*/, categories];
+                }
+            });
+        });
+    };
+    RageRpcAnimationDataProvider.prototype.playAnimation = function (animation) {
+        rpc.callServer('playAnimation', animation);
+    };
+    return RageRpcAnimationDataProvider;
+}());
+exports.RageRpcAnimationDataProvider = RageRpcAnimationDataProvider;
+//# sourceMappingURL=rage-rpc-animation-data-provider.js.map
