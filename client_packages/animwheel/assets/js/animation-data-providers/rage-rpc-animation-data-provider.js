@@ -42,27 +42,58 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var rpc = __importStar(require("rage-rpc"));
+var invalid_animation_name_exception_1 = __importDefault(require("./invalid-animation-name.exception"));
+var deferred_promise_1 = __importDefault(require("./deferred-promise"));
+var lite_event_1 = __importDefault(require("./lite-event"));
 var RageRpcAnimationDataProvider = /** @class */ (function () {
     function RageRpcAnimationDataProvider() {
+        var _this = this;
+        this.onEscape = new lite_event_1.default();
+        rpc.register('UpdateFavoriteAnimation_Success', function (slot) { _this.handleUpdateSuccess(slot); });
+        rpc.register('UpdateFavoriteAnimation_Failed', function (animationActionName) { _this.handleUpdateFailed(animationActionName); });
+        rpc.register('EscapeClicked', function () { _this.onEscape.trigger(); });
     }
-    RageRpcAnimationDataProvider.prototype.getCategories = function () {
+    RageRpcAnimationDataProvider.prototype.getFavoriteAnimations = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var categories;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, rpc.callServer('getAnimationCategories')];
-                    case 1:
-                        categories = _a.sent();
-                        alert(categories.length + " categories");
-                        return [2 /*return*/, categories];
+                    case 0: return [4 /*yield*/, rpc.callClient('Animwheel_GetFavoriteAnimations')];
+                    case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });
     };
-    RageRpcAnimationDataProvider.prototype.playAnimation = function (animation) {
-        rpc.callServer('playAnimation', animation);
+    RageRpcAnimationDataProvider.prototype.updateFavoriteAnimation = function (slotIndex, animationActionName) {
+        this.updatePromise = new deferred_promise_1.default(function () {
+            rpc.callClient('Animwheel_UpdateFavoriteAnimation', { slotIndex: slotIndex, animationActionName: animationActionName });
+        });
+        return this.updatePromise.underlyingPromise;
+    };
+    RageRpcAnimationDataProvider.prototype.playAnimation = function (animationActionName) {
+        rpc.callClient('Animwheel_PlayAnimation', animationActionName);
+    };
+    RageRpcAnimationDataProvider.prototype.notifyEditorVisibility = function (isVisible) {
+        rpc.callClient('setCefActive', isVisible);
+    };
+    Object.defineProperty(RageRpcAnimationDataProvider.prototype, "OnEscape", {
+        get: function () { return this.onEscape.expose(); },
+        enumerable: true,
+        configurable: true
+    });
+    RageRpcAnimationDataProvider.prototype.handleUpdateSuccess = function (slot) {
+        if (this.updatePromise) {
+            this.updatePromise.resolve(slot);
+        }
+    };
+    RageRpcAnimationDataProvider.prototype.handleUpdateFailed = function (animationActionName) {
+        if (this.updatePromise) {
+            this.updatePromise.reject(new invalid_animation_name_exception_1.default(animationActionName));
+        }
     };
     return RageRpcAnimationDataProvider;
 }());

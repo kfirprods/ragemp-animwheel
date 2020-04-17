@@ -1,54 +1,30 @@
-import { IAnimationDataProvider } from './animation-data-providers/animation-data-provider';
 import { RageRpcAnimationDataProvider } from './animation-data-providers/rage-rpc-animation-data-provider';
-import { StaticTestAnimationDataProvider } from './animation-data-providers/static-test-animation-data-provider';
-import { AnimationCategory, Animation } from 'ragemp-animwheel-types';
+import { IAnimationDataProvider } from './animation-data-providers/animation-data-provider';
+import AnimwheelSlot from '../../models/animwheel-slot.type';
+import InvalidAnimationNameError from './animation-data-providers/invalid-animation-name.exception';
+
 
 /* Consts */
-const minimumCategoryCircles = 5;
-const itemRadius = 96;
-
+const minimumWheelItems = 5;
+const itemRadius = 96; // TODO: Get that from the CSS class using JQuery
 
 /* Classes */
 abstract class WheelItem {
     public x: number;
     public y: number;
 
-    constructor(public text: string, public icon: string) {
+    constructor(public id: any, public text: string, public icon: string) {
     }
 
     setPosition(x: number, y: number) {
         this.x = x;
         this.y = y;
     }
-
-    hovered() {
-
-    }
-
-    clicked() {
-
-    }
-}
-
-class CategoryWheelItem extends WheelItem {
-    constructor(public text: string, public icon: string, private children: WheelItem[]) {
-        super(text, icon);
-    }
-}
-
-class AnimationCategoryWheelItem extends CategoryWheelItem {
-    constructor(public categoryInfo: AnimationCategory) {
-        super(
-            categoryInfo.name,
-            categoryInfo.icon,
-            categoryInfo.animations.map(animation => new AnimationWheelItem(animation))
-        );
-    }
 }
 
 class AnimationWheelItem extends WheelItem {
-    constructor(public animationInfo: Animation) {
-        super(animationInfo.name, animationInfo.icon);
+    constructor(public favoriteAnimation: AnimwheelSlot) {
+        super(favoriteAnimation.slot, favoriteAnimation.animation, getIconForCategory(favoriteAnimation.category));
     }
 }
 
@@ -66,7 +42,7 @@ abstract class Wheel {
 
     // Calculate position on the wheel for a specific item
     private getPositionForItem(itemIndex: number, totalItemCount: number) {
-        const itemCount = Math.max(minimumCategoryCircles, totalItemCount);
+        const itemCount = Math.max(minimumWheelItems, totalItemCount);
 
         let rotation = (Math.PI * 2) / itemCount;
         rotation *= itemIndex;
@@ -85,7 +61,7 @@ abstract class Wheel {
 
     abstract wheelItemFactory(item): WheelItem;
 
-    insertItems(dataItems: object[], index = 0): WheelItem[] {
+    insertItems(dataItems: any[], index = 0): WheelItem[] {
         // Add the items at the specified index
         this.items.splice(
             index,
@@ -113,69 +89,105 @@ abstract class Wheel {
     addItem(dataItem: any): WheelItem {
         return this.addItems(new Array(dataItem))[0];
     }
+
+    replaceItem(existingItem: WheelItem, newDataItem: any): [WheelItem, WheelItem] {
+        const oldWheelItemIndex = this.items.indexOf(existingItem);
+        const oldWheelItem = this.items[oldWheelItemIndex];
+        const newWheelItem = this.wheelItemFactory(newDataItem);
+        newWheelItem.setPosition(oldWheelItem.x, oldWheelItem.y);
+
+        this.items.splice(oldWheelItemIndex, 1, newWheelItem);
+
+        return [oldWheelItem, newWheelItem];
+    }
 }
 
 class AnimationWheel extends Wheel {
     wheelItemFactory(item: any) {
-        if (item.animations) {
-            return new AnimationCategoryWheelItem(item as AnimationCategory);
-        }
-        else {
-            return new AnimationWheelItem(item as Animation);
-        }
+        return new AnimationWheelItem(item as AnimwheelSlot);
     }
 }
 
 class Controller {
-    private categoriesWheel: Wheel;
-    private currentWheel: Wheel;
+    wheel: Wheel;
 
     constructor(private animationDataProvider: IAnimationDataProvider) {
-
     }
 
     // When a wheel item is hovered, its name appears at the center of the wheel
-    handleItemHover(item: WheelItem) {
-        $('#current-category-name').text(item.text);
+    private handleItemHover(item: WheelItem) {
+        $('#current-wheelitem-name').text(item.text);
     }
 
-    handleItemClicked(item: WheelItem) {
-        if (item instanceof AnimationCategoryWheelItem) {
-            // Clear out previous wheel
-            // TODO: Hide categories instead of clearing because they might appear again soon
-            $("#wheel-container > *:not('.current-category')").remove();
-
-            // Clear current category text label
-            $('#current-category-name').text('');
-
-            // Create a new wheel with the animations as items
-            this.currentWheel = this.createWheel((item as AnimationCategoryWheelItem).categoryInfo.animations);
-        }
-        else {
-            this.animationDataProvider.playAnimation((item as AnimationWheelItem).animationInfo);
-        }
+    private handleItemClicked(item: WheelItem) {
+        const animWheelItem = item as AnimationWheelItem;
+        this.animationDataProvider.playAnimation(animWheelItem.favoriteAnimation.animation);
     }
 
-    onAnimationClick(animation: Animation) {
-        this.animationDataProvider.playAnimation(animation);
+    private handleItemEdit(item: WheelItem) {
+        const animWheelItem = item as AnimationWheelItem;
+
+        $('#apply-edit-button').unbind('click');
+        $('#cancel-edit-button').unbind('click');
+
+        // TODO: Move to editor component
+        this.animationDataProvider.notifyEditorVisibility(true);
+        $('#item-editor').show();
+        $('#item-editor').css('display', 'flex');
+        $('#edit-text').val(animWheelItem.favoriteAnimation.animation);
+        $('#editor-current-animation-label').text(animWheelItem.favoriteAnimation.animation);
+        $('#edit-text').focus();
+        $('#editor-current-animation-label').val(animWheelItem.favoriteAnimation.animation);
+
+        $('#apply-edit-button').unbind('click');
+        $('#cancel-edit-button').unbind('click');
+        $('#edit-text').unbind('keypress');
+
+        $('#apply-edit-button').click(() => { this.handleEditApply(animWheelItem); });
+        $('#cancel-edit-button').click(() => { this.handleEditCancel(); });
+
+        // Allow hitting enter in the textbox to apply
+        $('#edit-text').keypress(e => {
+            var keyCode = e.keyCode || e.which;
+            if (keyCode == 13) { // On ENTER
+                this.handleEditApply(animWheelItem);
+            }
+        });
+
+        this.animationDataProvider.OnEscape.on(()=>{
+            this.handleEditCancel();
+        });
     }
 
+    // TODO: Move to gui managing component
     private createWheelItemContainerFromTemplate(wheelItem: WheelItem): JQuery<HTMLElement> {
-        const categoryTemplateContainer = $('<div>');
+        const wheelItemTemplateContainer = $(`<div data-id="${wheelItem.id}">`);
 
         // @ts-ignore  loadTemplate isn't recognized, but it'll be imported by the HTML file
-        categoryTemplateContainer.loadTemplate($('#category-template'), wheelItem);
+        wheelItemTemplateContainer.loadTemplate($('#wheelitem-template'), wheelItem);
 
         // Position the item on the wheel
-        categoryTemplateContainer.css('position', 'absolute');
-        categoryTemplateContainer.css('left', `${wheelItem.x}px`);
-        categoryTemplateContainer.css('top', `${wheelItem.y}px`);
+        wheelItemTemplateContainer.css('position', 'absolute');
+        wheelItemTemplateContainer.css('left', `${wheelItem.x}px`);
+        wheelItemTemplateContainer.css('top', `${wheelItem.y}px`);
 
         // Register events for interaction with the item
-        categoryTemplateContainer.mouseenter(() => { this.handleItemHover(wheelItem) });
-        categoryTemplateContainer.click(() => { this.handleItemClicked(wheelItem) });
+        wheelItemTemplateContainer.mouseenter(() => { this.handleItemHover(wheelItem) });
+        wheelItemTemplateContainer.find('.wheelitem-circle-container').click(() => { this.handleItemClicked(wheelItem) });
+        wheelItemTemplateContainer.find('.wheelitem-edit-button').click(() => { this.handleItemEdit(wheelItem) });
 
-        return categoryTemplateContainer;
+        return wheelItemTemplateContainer;
+    }
+
+    private replaceExistingWheelItem(existingWheelItem: WheelItem, newWheelItem: WheelItem) {
+        const wheelContainer = $('#wheel-container');
+
+        // Remove existing item
+        $(`div[data-id="${existingWheelItem.id}"]`).remove();
+
+        // Create the new one in its place
+        const newContainer = this.createWheelItemContainerFromTemplate(newWheelItem);
+        newContainer.appendTo(wheelContainer);
     }
 
     private createWheel(items: any[]): Wheel {
@@ -193,8 +205,8 @@ class Controller {
             height: containerDiameter
         });
 
-        // Vertically center the current-category text label
-        $('.current-category').css('top', `${containerDiameter / 2}px`);
+        // Vertically center the text label that displays the current item's text
+        $('.current-wheelitem').css('top', `${containerDiameter / 2}px`);
 
         const wheel = new AnimationWheel(wheelContainer.width() / 2);
         wheel.addItems(items).forEach(wheelItem => {
@@ -208,16 +220,62 @@ class Controller {
         return wheel;
     }
 
-    async setupCategoriesWheel() {
-        const animationCategories = await this.animationDataProvider.getCategories();
-        this.categoriesWheel = this.createWheel(animationCategories);
+    async setupWheel() {
+        // Ask the client for the favorite animations list
+        let favoriteAnimations = await this.animationDataProvider.getFavoriteAnimations();
 
-        // Remove loading indication
-        $('#loading-spinner').remove();
+        // Sort them by the slot index
+        favoriteAnimations = favoriteAnimations.sort(favoriteAnimation => favoriteAnimation.slot);
+
+        this.wheel = this.createWheel(favoriteAnimations);
+    }
+
+    private handleEditApply(animWheelItem: AnimationWheelItem) {
+        const newAnimationActionName = $('#edit-text').val() as string;
+        $('#loading-spinner').css('visibility', 'visible');
+
+        this.animationDataProvider.updateFavoriteAnimation(
+            animWheelItem.favoriteAnimation.slot,
+            newAnimationActionName
+        ).then(newAnimationSlot => {
+            var replacement = this.wheel.replaceItem(animWheelItem, newAnimationSlot);
+            this.replaceExistingWheelItem(replacement[0], replacement[1]);
+
+            $('#editor-error-message').css('visibility', 'hidden');
+            $('#edit-text').val("");
+            $('#item-editor').hide();
+            $('#loading-spinner').css('visibility', 'hidden');
+            this.animationDataProvider.notifyEditorVisibility(false);
+        }).catch(reason => {
+            console.log(reason);
+            $('#editor-error-message').css('visibility', 'visible');
+            $('#loading-spinner').css('visibility', 'hidden');
+        });
+    }
+
+    private handleEditCancel() {
+        $('#editor-error-message').css('visibility', 'hidden');
+            $('#edit-text').val("");
+            $('#item-editor').hide();
+        this.animationDataProvider.notifyEditorVisibility(false);
     }
 }
 
 const controller = new Controller(new RageRpcAnimationDataProvider());
-// const controller = new Controller(new StaticTestAnimationDataProvider());
-// Setup the initial wheel, which is the one that displays animation categories
-controller.setupCategoriesWheel();
+controller.setupWheel();
+
+function getIconForCategory(category: string): string {
+    switch (category.toLowerCase()) {
+        case "food & drink": {
+            category = "food.svg";
+            break;
+        }
+        case "ground": {
+            category = "laying.svg";
+            break;
+        }
+
+    }
+
+    return `assets/img/categories/${category.toLowerCase()}.svg`;
+}

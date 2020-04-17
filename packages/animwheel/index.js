@@ -1,96 +1,95 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var mysql = __importStar(require("mysql2/promise"));
-var rpc = __importStar(require("rage-rpc"));
-var ragemp_animwheel_types_1 = require("ragemp-animwheel-types");
-var mysqlConnection = mysql.createConnection({
-    // Change this
-    user: 'animwheelAdmin',
-    password: '1234',
-    database: 'sys'
-});
-mysqlConnection.then(function () {
-    console.log('Animwheel MySQL connected');
-}, function (error) {
-    console.log("Animwheel MySQL error: " + error);
-});
-console.log('Animwheel package is running');
-mp.events.add('PLAY_ANIMATION', function (player, animation_key, animation_name, animation_flag) {
+var animation_flags_enum_1 = require("./enums/animation-flags.enum");
+var anim_data_type_1 = __importDefault(require("./models/anim-data.type"));
+var animwheel_slot_type_1 = __importDefault(require("./models/animwheel-slot.type"));
+// This is the main list that contains all animations
+var animations = [
+    new anim_data_type_1.default("sit", "Sitting", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.Loop | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "switch@michael@sitting", "idle"),
+    new anim_data_type_1.default("sit2", "Sitting", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.Loop | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "amb@world_human_stupor@male@base", "base"),
+    new anim_data_type_1.default("sit3", "Sitting", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.Loop | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "timetable@michael@on_sofaidle_a", "sit_sofa_a"),
+    new anim_data_type_1.default("liedown1", "Laying", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.StopOnLastFrame | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "amb@world_human_sit_ups@male@enter", "enter"),
+    new anim_data_type_1.default("liedown2", "Laying", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.StopOnLastFrame | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "amb@world_human_sunbathe@female@back@enter", "enter"),
+    new anim_data_type_1.default("liedown3", "Laying", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.StopOnLastFrame | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "amb@world_human_sunbathe@female@front@enter", "enter"),
+    new anim_data_type_1.default("groundhurt1", "Laying", -1, "null", new mp.Vector3(0, 0, -6), new mp.Vector3(0, 0, -2), (animation_flags_enum_1.AnimationFlags.Loop | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "combat@damage@rb_writhe", "rb_writhe_loop"),
+    new anim_data_type_1.default("groundhurt2", "Laying", -1, "null", new mp.Vector3(0, 0, -6), new mp.Vector3(0, 0, -2), (animation_flags_enum_1.AnimationFlags.Loop | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "combat@damage@writhe", "writhe_loop"),
+    new anim_data_type_1.default("crossarms1", "Standing", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.StopOnLastFrame | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "amb@world_human_stand_guard@male@enter", "enter"),
+    new anim_data_type_1.default("crossarms2", "Standing", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.StopOnLastFrame | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "amb@world_human_stand_impatient@female@no_sign@base", "base"),
+    new anim_data_type_1.default("thinking", "Standing", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.Loop | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "amb@code_human_police_investigate@idle_a", "idle_a"),
+    new anim_data_type_1.default("idle1", "Standing", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.Loop | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "amb@code_human_cross_road@male@idle_a", "idle_e"),
+    new anim_data_type_1.default("idle2", "Standing", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.Loop | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "amb@code_human_cross_road@male@base", "base"),
+    new anim_data_type_1.default("wave", "Expressions", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.Loop | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "anim@mp_player_intcelebrationmale@wave", "wave"),
+    new anim_data_type_1.default("loco", "Expressions", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.Loop | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "anim@mp_player_intcelebrationmale@you_loco", "you_loco"),
+    new anim_data_type_1.default("ok", "Expressions", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.Loop | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "anim@mp_player_intselfiedock", "idle_a"),
+    new anim_data_type_1.default("thumbsup", "Expressions", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.Loop | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "anim@mp_player_intincarthumbs_upstd@ds@", "idle_a"),
+    new anim_data_type_1.default("lean", "Leaning", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.Loop | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "amb@world_human_leaning@male@wall@back@hands_together@idle_a", "idle_a"),
+    new anim_data_type_1.default("leanfoot", "Leaning", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.Loop | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "amb@world_human_leaning@male@wall@back@foot_up@idle_a", "idle_a"),
+    new anim_data_type_1.default("leancar", "Leaning", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.Loop | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "switch@michael@sitting_on_car_bonnet", "sitting_on_car_bonnet_loop"),
+    new anim_data_type_1.default("leanrail", "Leaning", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.Loop | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "missstrip_club_lean", "player_lean_rail_loop"),
+    new anim_data_type_1.default("groundhurt1", "Ground", -1, "null", new mp.Vector3(0, 0, -6), new mp.Vector3(0, 0, -2), (animation_flags_enum_1.AnimationFlags.Loop | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "combat@damage@rb_writhe", "rb_writhe_loop"),
+    new anim_data_type_1.default("handsup", "Surrender", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.Loop | animation_flags_enum_1.AnimationFlags.OnlyAnimateUpperBody | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "missfbi5ig_20b", "hands_up_scientist"),
+    new anim_data_type_1.default("handsup2", "Surrender", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.Loop | animation_flags_enum_1.AnimationFlags.AllowPlayerControl | animation_flags_enum_1.AnimationFlags.OnlyAnimateUpperBody), "missminuteman_1ig_2", "handsup_base"),
+    new anim_data_type_1.default("halt", "Surrender", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.Loop | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "amb@code_human_police_crowd_control@idle_a", "idle_a"),
+    new anim_data_type_1.default("handsupknees", "Surrender", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.Loop | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "busted", "idle_b"),
+    new anim_data_type_1.default("handsupknees2", "Surrender", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.Loop | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "random@arrests", "kneeling_arrest_idle"),
+    new anim_data_type_1.default("point", "Social", -1, "null", new mp.Vector3(0.0, 0.0, 0.0), new mp.Vector3(0.0, 0.0, 0.0), (animation_flags_enum_1.AnimationFlags.StopOnLastFrame | animation_flags_enum_1.AnimationFlags.OnlyAnimateUpperBody | animation_flags_enum_1.AnimationFlags.AllowPlayerControl), "oddjobs@suicide", "bystander_pointinto"),
+];
+function getAnimDataByActionName(animationActionName) {
+    var matchingAnimations = animations.filter(function (anim) { return anim.action == animationActionName; });
+    if (matchingAnimations.length == 0) {
+        return null;
+    }
+    else {
+        return matchingAnimations[0];
+    }
+}
+function getDefaultFavoriteAnimations() {
+    return ["sit", "liedown1", "crossarms1", "wave", "loco", "lean", "handsup", "handsupknees", "point", "groundhurt1"].map(function (defaultAnimName) {
+        return getAnimDataByActionName(defaultAnimName);
+    }).map(function (defaultAnim, index) {
+        return new animwheel_slot_type_1.default(index, defaultAnim.action, defaultAnim.category);
+    });
+}
+var playerFavoriteAnimations = new Map(); // Map socialClub to slots; in a real server this would be in a DB
+function getFavoriteAnimations(player) {
+    if (!(playerFavoriteAnimations.has(player.socialClub))) {
+        playerFavoriteAnimations.set(player.socialClub, getDefaultFavoriteAnimations());
+    }
+    return playerFavoriteAnimations.get(player.socialClub);
+}
+// Server's endpoint for letting the client play animations
+mp.events.add('PlayAnimation', function (player, action) {
     player.stopAnimation();
-    player.playAnimation(animation_key, animation_name, 1, animation_flag);
+    var animData = getAnimDataByActionName(action);
+    if (animData == null) {
+        // This only happens if the client provided a non-existent animation name (NOTE: shouldn't happen with the animwheel)
+        return;
+    }
+    player.playAnimation(animData.rageDictKey, animData.rageDictValue, 1, animData.animFlag);
 });
-rpc.register('getAnimationCategories', function () { return __awaiter(void 0, void 0, void 0, function () {
-    var db, _a, categoryRows, categoryFields, _b, animationRows, animationFields;
-    return __generator(this, function (_c) {
-        switch (_c.label) {
-            case 0: return [4 /*yield*/, mysqlConnection];
-            case 1:
-                db = _c.sent();
-                return [4 /*yield*/, db.execute("SELECT * FROM animation_categories")];
-            case 2:
-                _a = _c.sent(), categoryRows = _a[0], categoryFields = _a[1];
-                return [4 /*yield*/, db.execute("SELECT * FROM animations")];
-            case 3:
-                _b = _c.sent(), animationRows = _b[0], animationFields = _b[1];
-                // @ts-ignore
-                return [2 /*return*/, categoryRows.map(function (categoryRow) {
-                        return new ragemp_animwheel_types_1.AnimationCategory(categoryRow.Name, categoryRow.IconFilePath, 
-                        // @ts-ignore
-                        animationRows.filter(function (animationRow) { return animationRow.CategoryName === categoryRow.Name; }).map(function (animationRow) {
-                            return new ragemp_animwheel_types_1.Animation(animationRow.DisplayName, animationRow.IconFilePath, animationRow.RageDictKey, animationRow.RageDictName, animationRow.Flag);
-                        }));
-                    })];
-        }
-    });
-}); });
-rpc.register('playAnimation', function (animation, info) { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        info.player.stopAnimation();
-        info.player.playAnimation(animation.rageDictKey, animation.rageDictValue, 1, animation.flag);
-        return [2 /*return*/];
-    });
-}); });
+// Server's endpoint for letting users edit their favorites
+mp.events.add('UpdateFavoriteAnimation', function (player, slot, animationActionName) {
+    var updatedAnimData = getAnimDataByActionName(animationActionName);
+    if (updatedAnimData == null) {
+        player.call('UpdateFavoriteAnimation_Failed', [animationActionName]);
+        return;
+    }
+    // Update the server-side favorites store
+    var currentFavorites = playerFavoriteAnimations.get(player.socialClub);
+    var currentSlot = currentFavorites.find(function (favorite) { return favorite.slot == slot; });
+    currentSlot.animation = updatedAnimData.action;
+    currentSlot.category = updatedAnimData.category;
+    // This will cause the client to update the data, as well as allow it to stop displaying the loading animation
+    player.call('UpdateFavoriteAnimation_Success', [slot, currentSlot.animation, currentSlot.category]);
+});
+mp.events.add('playerJoin', function (player) {
+    // When a player joins the server, inform the animwheel client code what the favorite anims are
+    player.call('SetFavoriteAnimations', [getFavoriteAnimations(player)]);
+});
+mp.events.addCommand('stopanim', function (player) {
+    player.stopAnimation();
+});
 //# sourceMappingURL=index.js.map

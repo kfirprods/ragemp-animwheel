@@ -106,3 +106,5 @@ client_packages/freeroam
 packages/freeroam
 bt.dat
 conf.json
+client_packages/hidechat
+packages/hidechat

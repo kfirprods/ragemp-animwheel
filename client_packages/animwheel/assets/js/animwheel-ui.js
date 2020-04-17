@@ -57,13 +57,13 @@ var __spreadArrays = (this && this.__spreadArrays) || function () {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var rage_rpc_animation_data_provider_1 = require("./animation-data-providers/rage-rpc-animation-data-provider");
-var ragemp_animwheel_types_1 = require("ragemp-animwheel-types");
 /* Consts */
-var minimumCategoryCircles = 5;
-var itemRadius = 96;
+var minimumWheelItems = 5;
+var itemRadius = 96; // TODO: Get that from the CSS class using JQuery
 /* Classes */
 var WheelItem = /** @class */ (function () {
-    function WheelItem(text, icon) {
+    function WheelItem(id, text, icon) {
+        this.id = id;
         this.text = text;
         this.icon = icon;
     }
@@ -71,37 +71,13 @@ var WheelItem = /** @class */ (function () {
         this.x = x;
         this.y = y;
     };
-    WheelItem.prototype.hovered = function () {
-    };
-    WheelItem.prototype.clicked = function () {
-    };
     return WheelItem;
 }());
-var CategoryWheelItem = /** @class */ (function (_super) {
-    __extends(CategoryWheelItem, _super);
-    function CategoryWheelItem(text, icon, children) {
-        var _this = _super.call(this, text, icon) || this;
-        _this.text = text;
-        _this.icon = icon;
-        _this.children = children;
-        return _this;
-    }
-    return CategoryWheelItem;
-}(WheelItem));
-var AnimationCategoryWheelItem = /** @class */ (function (_super) {
-    __extends(AnimationCategoryWheelItem, _super);
-    function AnimationCategoryWheelItem(categoryInfo) {
-        var _this = _super.call(this, categoryInfo.name, categoryInfo.icon, categoryInfo.animations.map(function (animation) { return new AnimationWheelItem(animation); })) || this;
-        _this.categoryInfo = categoryInfo;
-        return _this;
-    }
-    return AnimationCategoryWheelItem;
-}(CategoryWheelItem));
 var AnimationWheelItem = /** @class */ (function (_super) {
     __extends(AnimationWheelItem, _super);
-    function AnimationWheelItem(animationInfo) {
-        var _this = _super.call(this, animationInfo.name, animationInfo.icon) || this;
-        _this.animationInfo = animationInfo;
+    function AnimationWheelItem(favoriteAnimation) {
+        var _this = _super.call(this, favoriteAnimation.slot, favoriteAnimation.animation, getIconForCategory(favoriteAnimation.category)) || this;
+        _this.favoriteAnimation = favoriteAnimation;
         return _this;
     }
     return AnimationWheelItem;
@@ -116,7 +92,7 @@ var Wheel = /** @class */ (function () {
     }
     // Calculate position on the wheel for a specific item
     Wheel.prototype.getPositionForItem = function (itemIndex, totalItemCount) {
-        var itemCount = Math.max(minimumCategoryCircles, totalItemCount);
+        var itemCount = Math.max(minimumWheelItems, totalItemCount);
         var rotation = (Math.PI * 2) / itemCount;
         rotation *= itemIndex;
         rotation -= (Math.PI / 2);
@@ -152,6 +128,14 @@ var Wheel = /** @class */ (function () {
     Wheel.prototype.addItem = function (dataItem) {
         return this.addItems(new Array(dataItem))[0];
     };
+    Wheel.prototype.replaceItem = function (existingItem, newDataItem) {
+        var oldWheelItemIndex = this.items.indexOf(existingItem);
+        var oldWheelItem = this.items[oldWheelItemIndex];
+        var newWheelItem = this.wheelItemFactory(newDataItem);
+        newWheelItem.setPosition(oldWheelItem.x, oldWheelItem.y);
+        this.items.splice(oldWheelItemIndex, 1, newWheelItem);
+        return [oldWheelItem, newWheelItem];
+    };
     return Wheel;
 }());
 var AnimationWheel = /** @class */ (function (_super) {
@@ -160,12 +144,7 @@ var AnimationWheel = /** @class */ (function (_super) {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     AnimationWheel.prototype.wheelItemFactory = function (item) {
-        if (item instanceof ragemp_animwheel_types_1.AnimationCategory) {
-            return new AnimationCategoryWheelItem(item);
-        }
-        else {
-            return new AnimationWheelItem(item);
-        }
+        return new AnimationWheelItem(item);
     };
     return AnimationWheel;
 }(Wheel));
@@ -175,26 +154,67 @@ var Controller = /** @class */ (function () {
     }
     // When a wheel item is hovered, its name appears at the center of the wheel
     Controller.prototype.handleItemHover = function (item) {
-        $('#current-category-name').text(item.text);
+        $('#current-wheelitem-name').text(item.text);
     };
     Controller.prototype.handleItemClicked = function (item) {
-        if (item instanceof AnimationCategoryWheelItem) {
-            // Clear out previous wheel
-            // TODO: Hide instead of clearing
-            $('#wheel-container').empty();
-            // Create a new wheel with the animations as items
-            this.currentWheel = this.createWheel(item.categoryInfo.animations);
-        }
-        else {
-            this.animationDataProvider.playAnimation(item.animationInfo);
-        }
+        var animWheelItem = item;
+        this.animationDataProvider.playAnimation(animWheelItem.favoriteAnimation.animation);
     };
-    Controller.prototype.onAnimationClick = function (animation) {
-        this.animationDataProvider.playAnimation(animation);
+    Controller.prototype.handleItemEdit = function (item) {
+        var _this = this;
+        var animWheelItem = item;
+        $('#apply-edit-button').unbind('click');
+        $('#cancel-edit-button').unbind('click');
+        // TODO: Move to editor component
+        this.animationDataProvider.notifyEditorVisibility(true);
+        $('#item-editor').show();
+        $('#item-editor').css('display', 'flex');
+        $('#edit-text').val(animWheelItem.favoriteAnimation.animation);
+        $('#editor-current-animation-label').text(animWheelItem.favoriteAnimation.animation);
+        $('#edit-text').focus();
+        $('#editor-current-animation-label').val(animWheelItem.favoriteAnimation.animation);
+        $('#apply-edit-button').unbind('click');
+        $('#cancel-edit-button').unbind('click');
+        $('#edit-text').unbind('keypress');
+        $('#apply-edit-button').click(function () { _this.handleEditApply(animWheelItem); });
+        $('#cancel-edit-button').click(function () { _this.handleEditCancel(); });
+        // Allow hitting enter in the textbox to apply
+        $('#edit-text').keypress(function (e) {
+            var keyCode = e.keyCode || e.which;
+            if (keyCode == 13) { // On ENTER
+                _this.handleEditApply(animWheelItem);
+            }
+        });
+        this.animationDataProvider.OnEscape.on(function () {
+            _this.handleEditCancel();
+        });
+    };
+    // TODO: Move to gui managing component
+    Controller.prototype.createWheelItemContainerFromTemplate = function (wheelItem) {
+        var _this = this;
+        var wheelItemTemplateContainer = $("<div data-id=\"" + wheelItem.id + "\">");
+        // @ts-ignore  loadTemplate isn't recognized, but it'll be imported by the HTML file
+        wheelItemTemplateContainer.loadTemplate($('#wheelitem-template'), wheelItem);
+        // Position the item on the wheel
+        wheelItemTemplateContainer.css('position', 'absolute');
+        wheelItemTemplateContainer.css('left', wheelItem.x + "px");
+        wheelItemTemplateContainer.css('top', wheelItem.y + "px");
+        // Register events for interaction with the item
+        wheelItemTemplateContainer.mouseenter(function () { _this.handleItemHover(wheelItem); });
+        wheelItemTemplateContainer.find('.wheelitem-circle-container').click(function () { _this.handleItemClicked(wheelItem); });
+        wheelItemTemplateContainer.find('.wheelitem-edit-button').click(function () { _this.handleItemEdit(wheelItem); });
+        return wheelItemTemplateContainer;
+    };
+    Controller.prototype.replaceExistingWheelItem = function (existingWheelItem, newWheelItem) {
+        var wheelContainer = $('#wheel-container');
+        // Remove existing item
+        $("div[data-id=\"" + existingWheelItem.id + "\"]").remove();
+        // Create the new one in its place
+        var newContainer = this.createWheelItemContainerFromTemplate(newWheelItem);
+        newContainer.appendTo(wheelContainer);
     };
     Controller.prototype.createWheel = function (items) {
         var _this = this;
-        console.log("Creating wheel for items: " + items);
         var wheelContainer = $('#wheel-container');
         // Calculate the container's diameter
         var idealContainerDiameter = (items.length / 2) * (itemRadius + 16);
@@ -206,43 +226,72 @@ var Controller = /** @class */ (function () {
             width: containerDiameter,
             height: containerDiameter
         });
-        // Vertically center the current-category text label
-        $('.current-category').css('top', containerDiameter / 2 + "px");
+        // Vertically center the text label that displays the current item's text
+        $('.current-wheelitem').css('top', containerDiameter / 2 + "px");
         var wheel = new AnimationWheel(wheelContainer.width() / 2);
         wheel.addItems(items).forEach(function (wheelItem) {
-            var categoryTemplateContainer = $('<div>');
-            // @ts-ignore  loadTemplate isn't recognized, but it'll be imported by the HTML file
-            categoryTemplateContainer.loadTemplate($('#category-template'), wheelItem);
-            // Position the item on the wheel
-            categoryTemplateContainer.css('position', 'absolute');
-            categoryTemplateContainer.css('left', wheelItem.x + "px");
-            categoryTemplateContainer.css('top', wheelItem.y + "px");
-            // Register events for interaction with the item
-            categoryTemplateContainer.mouseenter(function () { _this.handleItemHover(wheelItem); });
-            categoryTemplateContainer.click(function () { _this.handleItemClicked(wheelItem); });
+            // Create a DIV element to present the wheel item
+            var wheelItemContainer = _this.createWheelItemContainerFromTemplate(wheelItem);
             // Add the item to the page
-            categoryTemplateContainer.appendTo(wheelContainer);
+            wheelItemContainer.appendTo(wheelContainer);
         });
         return wheel;
     };
-    Controller.prototype.setupCategoriesWheel = function () {
+    Controller.prototype.setupWheel = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var animationCategories;
+            var favoriteAnimations;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.animationDataProvider.getCategories()];
+                    case 0: return [4 /*yield*/, this.animationDataProvider.getFavoriteAnimations()];
                     case 1:
-                        animationCategories = _a.sent();
-                        this.categoriesWheel = this.createWheel(animationCategories);
+                        favoriteAnimations = _a.sent();
+                        // Sort them by the slot index
+                        favoriteAnimations = favoriteAnimations.sort(function (favoriteAnimation) { return favoriteAnimation.slot; });
+                        this.wheel = this.createWheel(favoriteAnimations);
                         return [2 /*return*/];
                 }
             });
         });
     };
+    Controller.prototype.handleEditApply = function (animWheelItem) {
+        var _this = this;
+        var newAnimationActionName = $('#edit-text').val();
+        $('#loading-spinner').css('visibility', 'visible');
+        this.animationDataProvider.updateFavoriteAnimation(animWheelItem.favoriteAnimation.slot, newAnimationActionName).then(function (newAnimationSlot) {
+            var replacement = _this.wheel.replaceItem(animWheelItem, newAnimationSlot);
+            _this.replaceExistingWheelItem(replacement[0], replacement[1]);
+            $('#editor-error-message').css('visibility', 'hidden');
+            $('#edit-text').val("");
+            $('#item-editor').hide();
+            $('#loading-spinner').css('visibility', 'hidden');
+            _this.animationDataProvider.notifyEditorVisibility(false);
+        }).catch(function (reason) {
+            console.log(reason);
+            $('#editor-error-message').css('visibility', 'visible');
+            $('#loading-spinner').css('visibility', 'hidden');
+        });
+    };
+    Controller.prototype.handleEditCancel = function () {
+        $('#editor-error-message').css('visibility', 'hidden');
+        $('#edit-text').val("");
+        $('#item-editor').hide();
+        this.animationDataProvider.notifyEditorVisibility(false);
+    };
     return Controller;
 }());
 var controller = new Controller(new rage_rpc_animation_data_provider_1.RageRpcAnimationDataProvider());
-// const controller = new Controller(new StaticTestAnimationDataProvider());
-// Setup the initial wheel, which is the one that displays animation categories
-controller.setupCategoriesWheel();
+controller.setupWheel();
+function getIconForCategory(category) {
+    switch (category.toLowerCase()) {
+        case "food & drink": {
+            category = "food.svg";
+            break;
+        }
+        case "ground": {
+            category = "laying.svg";
+            break;
+        }
+    }
+    return "assets/img/categories/" + category.toLowerCase() + ".svg";
+}
 //# sourceMappingURL=animwheel-ui.js.map
