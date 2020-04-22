@@ -18,7 +18,7 @@ var KEY_O = 0x4F;
 var TOGGLE_ANIMWHEEL_KEY = KEY_O;
 var isCefActive = false;
 var favoriteAnimations = new Array();
-var animwheelBrowserController = new browser_controller_1.default('package://animwheel/animwheel.html');
+var animwheelBrowserController = new browser_controller_1.default('package://animwheel/cef/animwheel.html');
 function toggleAnimWheel() {
     if (animwheelBrowserController.isVisible) {
         animwheelBrowserController.hide();

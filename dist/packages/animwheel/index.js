@@ -36,7 +36,7 @@ mp.events.add('PlayAnimation', function (player, action) {
         // This only happens if the client provided a non-existent animation name (NOTE: shouldn't happen with the animwheel)
         return;
     }
-    player.playAnimation(animData.rageDictKey, animData.rageDictValue, 1, animData.animFlag);
+    player.playAnimation(animData.rageDictKey, animData.rageDictValue, 2, animData.animFlag);
 });
 // Server's endpoint for letting users edit their favorites
 mp.events.add('UpdateFavoriteAnimation', function (player, slot, animationActionName) {

@@ -39,7 +39,7 @@ mp.events.add('PlayAnimation', (player, action) => {
         return;
     }
 
-    player.playAnimation(animData.rageDictKey, animData.rageDictValue, 1, animData.animFlag);
+    player.playAnimation(animData.rageDictKey, animData.rageDictValue, 2, animData.animFlag);
 });
 
 // Server's endpoint for letting users edit their favorites

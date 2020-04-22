@@ -9,7 +9,7 @@ const TOGGLE_ANIMWHEEL_KEY = KEY_O;
 let isCefActive = false;
 let favoriteAnimations: AnimwheelSlot[] = new Array();
 
-const animwheelBrowserController = new BrowserController('package://animwheel/animwheel.html');
+const animwheelBrowserController = new BrowserController('package://animwheel/cef/animwheel.html');
 
 function toggleAnimWheel() {
     if (animwheelBrowserController.isVisible) {
