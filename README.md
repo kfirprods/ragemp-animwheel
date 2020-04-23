@@ -79,3 +79,8 @@ In the case that you need to make changes to the TypeScript source:
     ```
 * Edit whatever files in the `.\src` folder
 * Run the following batch script: `.\compile_all.bat`. If all goes well, you'll now have everything in the `.\dist` folder.
+
+#
+## Special thanks
+* The GTA World community (https://gta.world) for providing me with a list of animations and the specifications for this feature.
+* The brilliant rage-rpc package (https://github.com/micaww/rage-rpc) for making the remote process communications with the CEF a piece of cake.
