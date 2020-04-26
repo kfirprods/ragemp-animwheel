@@ -63,8 +63,14 @@ mp.events.add('UpdateFavoriteAnimation', (player: PlayerMp, slot: number, animat
 });
 
 mp.events.add('playerJoin', (player) => {
+    // In your server, this would probably fetch the favorite animations from the database
+    const favoriteAnimations = getFavoriteAnimations(player);
+
     // When a player joins the server, inform the animwheel client code what the favorite anims are
-    player.call('SetFavoriteAnimations', [getFavoriteAnimations(player)]);
+    player.call('SetFavoriteAnimations', [favoriteAnimations]);
+
+    // Uncomment the next line to send a JSON of favorite animations instead (useful for C# servers)
+    // player.call('SetFavoriteAnimations_JSON', [JSON.stringify(favoriteAnimations)]);
 });
 
 mp.events.addCommand('stopanim', (player) => {

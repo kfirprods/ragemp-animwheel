@@ -44,9 +44,16 @@ mp.keys.bind(KEY_ESC, false, function () {
     }
 });
 // API for server
+function setFavoriteAnimations(newFavoriteAnimations) {
+    favoriteAnimations = newFavoriteAnimations;
+}
 // Allow the server to set the animations
 mp.events.add('SetFavoriteAnimations', function (newFavoriteAnimations) {
-    favoriteAnimations = newFavoriteAnimations;
+    setFavoriteAnimations(newFavoriteAnimations);
+});
+// Allow the server to set the animations using a JSON of AnimwheelSlot array
+mp.events.add('SetFavoriteAnimations_JSON', function (newFavoriteAnimationsJson) {
+    setFavoriteAnimations(JSON.parse(newFavoriteAnimationsJson));
 });
 mp.events.add('UpdateFavoriteAnimation_Failed', function (animationActionName) {
     rpc.callBrowser(animwheelBrowserController.browser, 'UpdateFavoriteAnimation_Failed', animationActionName);

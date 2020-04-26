@@ -7,7 +7,7 @@ const KEY_O = 0x4F;
 const TOGGLE_ANIMWHEEL_KEY = KEY_O;
 
 let isCefActive = false;
-let favoriteAnimations: AnimwheelSlot[] = new Array();
+var favoriteAnimations: AnimwheelSlot[] = new Array();
 
 const animwheelBrowserController = new BrowserController('package://animwheel/cef/animwheel.html');
 
@@ -42,9 +42,18 @@ mp.keys.bind(KEY_ESC, false, function() {
 });
 
 // API for server
+function setFavoriteAnimations(newFavoriteAnimations: AnimwheelSlot[]): void {
+    favoriteAnimations = newFavoriteAnimations;
+}
+
 // Allow the server to set the animations
 mp.events.add('SetFavoriteAnimations', (newFavoriteAnimations: AnimwheelSlot[]) => {
-    favoriteAnimations = newFavoriteAnimations;
+    setFavoriteAnimations(newFavoriteAnimations);
+});
+
+// Allow the server to set the animations using a JSON of AnimwheelSlot array
+mp.events.add('SetFavoriteAnimations_JSON', (newFavoriteAnimationsJson: string) => {
+    setFavoriteAnimations(JSON.parse(newFavoriteAnimationsJson));
 });
 
 mp.events.add('UpdateFavoriteAnimation_Failed', (animationActionName: string) => {

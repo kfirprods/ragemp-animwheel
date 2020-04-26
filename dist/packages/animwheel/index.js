@@ -15,13 +15,14 @@ function getAnimDataByActionName(animationActionName) {
     }
 }
 function getDefaultFavoriteAnimations() {
-    return ["sit", "liedown1", "crossarms1", "wave", "loco", "lean", "handsup", "handsupknees", "point", "groundhurt1"].map(function (defaultAnimName) {
+    return ["sit", "liedown1", "bumsign1", "finger", "crackhands", "lean", "handsup", "handsupknees", "point", "sitground"].map(function (defaultAnimName) {
         return getAnimDataByActionName(defaultAnimName);
     }).map(function (defaultAnim, index) {
         return new animwheel_slot_type_1.default(index, defaultAnim.action, defaultAnim.category.toString());
     });
 }
 var playerFavoriteAnimations = new Map(); // Map socialClub to slots; in a real server this would be in a DB
+// Example for getFavoriteAnimations that uses the non-persistent 'playerFavoriteAnimations' map
 function getFavoriteAnimations(player) {
     if (!(playerFavoriteAnimations.has(player.socialClub))) {
         playerFavoriteAnimations.set(player.socialClub, getDefaultFavoriteAnimations());
@@ -54,8 +55,12 @@ mp.events.add('UpdateFavoriteAnimation', function (player, slot, animationAction
     player.call('UpdateFavoriteAnimation_Success', [slot, currentSlot.animation, currentSlot.category]);
 });
 mp.events.add('playerJoin', function (player) {
+    // In your server, this would probably fetch the favorite animations from the database
+    var favoriteAnimations = getFavoriteAnimations(player);
     // When a player joins the server, inform the animwheel client code what the favorite anims are
-    player.call('SetFavoriteAnimations', [getFavoriteAnimations(player)]);
+    player.call('SetFavoriteAnimations', [favoriteAnimations]);
+    // Uncomment the next line to send a JSON of favorite animations instead (useful for C# servers)
+    // player.call('SetFavoriteAnimations_JSON', [JSON.stringify(favoriteAnimations)]);
 });
 mp.events.addCommand('stopanim', function (player) {
     player.stopAnimation();
