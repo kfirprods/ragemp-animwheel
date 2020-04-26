@@ -14,13 +14,14 @@ function getAnimDataByActionName(animationActionName: string): AnimData {
 }
 
 function getDefaultFavoriteAnimations(): AnimwheelSlot[] {
-    return ["sit", "liedown1", "crossarms1", "wave", "loco", "lean", "handsup", "handsupknees", "point", "groundhurt1"].map(defaultAnimName =>
+    return ["sit", "liedown1", "bumsign1", "finger", "crackhands", "lean", "handsup", "handsupknees", "point", "sitground"].map(defaultAnimName =>
         getAnimDataByActionName(defaultAnimName)).map((defaultAnim, index) =>
             new AnimwheelSlot(index, defaultAnim.action, defaultAnim.category.toString()));
 }
 
 const playerFavoriteAnimations = new Map<string, AnimwheelSlot[]>(); // Map socialClub to slots; in a real server this would be in a DB
 
+// Example for getFavoriteAnimations that uses the non-persistent 'playerFavoriteAnimations' map
 function getFavoriteAnimations(player: PlayerMp) {
     if (!(playerFavoriteAnimations.has(player.socialClub))) {
         playerFavoriteAnimations.set(player.socialClub, getDefaultFavoriteAnimations());
