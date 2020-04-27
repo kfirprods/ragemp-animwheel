@@ -267,11 +267,6 @@ controller.setupWheel();
 function getIconForCategory(category: string): string {
     // Convert some category names to others
     switch (category.toLowerCase()) {
-        // ground is basically the same as laying
-        case "ground": {
-            category = "laying";
-            break;
-        }
         // items category only features smoking
         case "items": {
             category = "smoking";
