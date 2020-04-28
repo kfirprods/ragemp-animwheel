@@ -1,5 +1,6 @@
 # ragemp-animwheel
 An animation wheel for RageMP (GTA V). The GUI is inspired by the in-game radio wheel.
+![Animwheel demonstration](https://i.imgur.com/ox5bdEv.png)
 
 #
 ## How it works
