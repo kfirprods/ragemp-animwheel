@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = {
-  entry: './js/animwheel-ui.ts',
+  entry: './index.ts',
   devtool: 'inline-source-map',
   watch: false,
   mode: "production",
@@ -18,7 +18,7 @@ module.exports = {
     extensions: [ '.tsx', '.ts', '.js' ],
   },
   output: {
-    filename: 'animwheel-bundle.js',
-    path: path.resolve(__dirname, '..', '..', '..', 'dist', 'client_packages', 'animwheel', 'cef'),
+    filename: 'index.js',
+    path: path.resolve(__dirname, '..', '..', '..', '..', 'dist', 'client_packages', 'animwheel'),
   },
 };

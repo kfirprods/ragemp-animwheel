@@ -1,19 +1,18 @@
 import * as rpc from 'rage-rpc';
-import AnimwheelSlot from "animwheel/models/animwheel-slot.type";
-import BrowserController from 'animwheel/browser-controller';
+import AnimwheelSlot from './models/animwheel-slot.type';
+import BrowserController from './browser-controller';
+import { CLOSE_EDITOR_KEY, TOGGLE_ANIMWHEEL_KEY, CLIENT_PACKAGE_ROOT_PATH } from './animwheel-config';
 
-const KEY_ESC = 27;
-const KEY_O = 0x4F;
-const TOGGLE_ANIMWHEEL_KEY = KEY_O;
-
-let isCefActive = false;
+var isCefActive = false;
+var isEditingAnim = false;
 var favoriteAnimations: AnimwheelSlot[] = new Array();
 
-const animwheelBrowserController = new BrowserController('package://animwheel/cef/animwheel.html');
+const animwheelBrowserController = new BrowserController(`package://${CLIENT_PACKAGE_ROOT_PATH}/cef/animwheel.html`);
 
 function toggleAnimWheel() {
     if (animwheelBrowserController.isVisible) {
         animwheelBrowserController.hide();
+        mp.events.call('setCefActive', false);
         return;
     }
 
@@ -23,19 +22,26 @@ function toggleAnimWheel() {
     }
 
     animwheelBrowserController.show();
+    mp.events.call('setCefActive', true);
 }
 
 // Bind a key to toggle the visibility of the animwheel
 mp.keys.bind(TOGGLE_ANIMWHEEL_KEY, false, function () {
-    // If the user is typing something in a CEF window, ignore the animwheel keybinding
-    if (isCefActive) {
+    // Ignore the key if the user is typing something in our editor
+    if (isEditingAnim) {
+        return;
+    }
+
+    // Ignore the key if the user is typing something in another CEF window
+    if (isCefActive && !animwheelBrowserController.isVisible) {
         return;
     }
 
     toggleAnimWheel();
 });
 
-mp.keys.bind(KEY_ESC, false, function() {
+// Bind a key to allow users to exit the editor (especially useful if they minimized the game and it's stuck on the map when they came back)
+mp.keys.bind(CLOSE_EDITOR_KEY, false, function () {
     if (animwheelBrowserController.isVisible) {
         rpc.callBrowser(animwheelBrowserController.browser, "EscapeClicked");
     }
@@ -75,6 +81,7 @@ rpc.register('Animwheel_GetFavoriteAnimations', () => {
 
 rpc.register('Animwheel_PlayAnimation', (animationActionName) => {
     animwheelBrowserController.hide();
+    mp.events.call('setCefActive', false);
     mp.events.callRemote('PlayAnimation', animationActionName);
 });
 
@@ -82,8 +89,8 @@ rpc.register('Animwheel_UpdateFavoriteAnimation', (args) => {
     mp.events.callRemote('UpdateFavoriteAnimation', args.slotIndex, args.animationActionName);
 });
 
-rpc.register('setCefActive', (isActive: boolean)=>{
-    mp.events.call('setCefActive', isActive);
+rpc.register('Animwheel_EditorVisibilityChanged', (isEditing: boolean) => {
+    isEditingAnim = isEditing;
 });
 
 // API for other client packages

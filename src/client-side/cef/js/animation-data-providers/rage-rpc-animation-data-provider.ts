@@ -33,7 +33,7 @@ export class RageRpcAnimationDataProvider implements IAnimationDataProvider {
     }
 
     notifyEditorVisibility(isVisible: boolean) {
-        rpc.callClient('setCefActive', isVisible);
+        rpc.callClient('Animwheel_EditorVisibilityChanged', isVisible);
     }
 
     public get OnEscape() { return this.onEscape.expose(); } 
