@@ -21,8 +21,8 @@ The client and the CEF depend on <b>rage-rpc</b> for two-way communications. How
 #
 ## How to add this package to your existing gamemode
 * Clone this git repository
-* Copy `.\dist\client_packages\rage-rpc` and `.\dist\client_packages\animwheel` to your server's `client_packages` folder
-* Update your server's `client_packages\index.js` to require rage-rpc and  animwheel
+* Copy `\dist\client_packages\animwheel` to your server's `client_packages` folder
+* Update your server's `client_packages\index.js` to require `animwheel`
 * In your server code, register the next events:
     * PlayAnimation
         ```
@@ -30,6 +30,11 @@ The client and the CEF depend on <b>rage-rpc</b> for two-way communications. How
         This is the event that the client triggers when a user clicked a wheel item.
         
         The animationName string is the text that is displayed in the wheel. It is determined by the list that was sent to the client when it joined.
+        ```
+    * StopAnimation
+        ```
+        --- StopAnimation()
+        This is the event that the client triggers when a user clicks the 'stop animation' button.
         ```
     * UpdateFavoriteAnimation
         ```
@@ -61,6 +66,24 @@ The client and the CEF depend on <b>rage-rpc</b> for two-way communications. How
     ```
 
 You can see server-code implementation examples in the repository's `.\src\server-side` folder. It's not recommended to use this code as-is, because it does not support advanced RAGE animation features, such as animating with objects.
+
+#
+## Animwheel Config
+The `src\rage-client-package\animwheel\animwheel-config.ts` file allows you to configure the next constants:
+
+```
+TOGGLE_ANIMWHEEL_KEY (default: U)
+CLOSE_EDITOR_KEY (default: Escape)
+CLIENT_PACKAGE_ROOT_PATH (default: "animwheel")
+```
+
+After making changes to the config, don't forget to re-compile the source files to update the `dist` folder.
+
+### Example 1 - placing animwheel client package within another folder
+You want to place the animwheel client package folder in the next path: `client_packages\lamerp\animwheel`. Just change `CLIENT_PACKAGE_ROOT_PATH` to `lamerp\animwheel`.
+
+### Example 2 - changing the animwheel toggle key
+You want players to use the key O to open/close the animwheel. To achieve that, change the value of `TOGGLE_ANIMWHEEL_KEY` to the keycode of O.
 
 #
 ## Editing the icons
