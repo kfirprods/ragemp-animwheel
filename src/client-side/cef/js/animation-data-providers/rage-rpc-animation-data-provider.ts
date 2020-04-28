@@ -32,6 +32,10 @@ export class RageRpcAnimationDataProvider implements IAnimationDataProvider {
         rpc.callClient('Animwheel_PlayAnimation', animationActionName);
     }
 
+    stopAnimation() {
+        rpc.callClient('Animwheel_StopAnimation');
+    }
+
     notifyEditorVisibility(isVisible: boolean) {
         rpc.callClient('Animwheel_EditorVisibilityChanged', isVisible);
     }

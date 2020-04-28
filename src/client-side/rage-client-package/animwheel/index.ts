@@ -9,10 +9,15 @@ var favoriteAnimations: AnimwheelSlot[] = new Array();
 
 const animwheelBrowserController = new BrowserController(`package://${CLIENT_PACKAGE_ROOT_PATH}/cef/animwheel.html`);
 
+function hideAnimWheel() {
+    animwheelBrowserController.hide();
+    mp.events.call('setCefActive', false);
+    isEditingAnim = false;
+}
+
 function toggleAnimWheel() {
     if (animwheelBrowserController.isVisible) {
-        animwheelBrowserController.hide();
-        mp.events.call('setCefActive', false);
+        hideAnimWheel();
         return;
     }
 
@@ -80,9 +85,15 @@ rpc.register('Animwheel_GetFavoriteAnimations', () => {
 });
 
 rpc.register('Animwheel_PlayAnimation', (animationActionName) => {
-    animwheelBrowserController.hide();
-    mp.events.call('setCefActive', false);
+    hideAnimWheel();
+
     mp.events.callRemote('PlayAnimation', animationActionName);
+});
+
+rpc.register('Animwheel_StopAnimation', () => {
+    hideAnimWheel();
+    
+    mp.events.callRemote('StopAnimation');
 });
 
 rpc.register('Animwheel_UpdateFavoriteAnimation', (args) => {

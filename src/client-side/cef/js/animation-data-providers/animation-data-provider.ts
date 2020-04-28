@@ -11,6 +11,9 @@ export interface IAnimationDataProvider {
     // Ask the client to play a chosen animation
     playAnimation(animationActionName: string): void;
 
+    // Ask the client to stop playing a chosen animation
+    stopAnimation(): void;
+
     // Notify the client whether a user is interacting with the animwheel editor
     notifyEditorVisibility(isVisible: boolean);
 

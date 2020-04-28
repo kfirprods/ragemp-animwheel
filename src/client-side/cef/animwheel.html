@@ -23,12 +23,22 @@
     <meta charset="utf-8" />
 </head>
 
-<body>
+<body style="display: none;">
     <!-- The actual wheel itself -->
     <div id="wheel-container">
         <!-- Display the name of the current selection in the center -->
         <div class="current-wheelitem">
-            <span id="current-wheelitem-name"></span>
+            <div>
+                <span id="current-wheelitem-name">anim-name</span>
+            </div>
+            <div>
+                <button id="stop-anim-btn">
+                    <img src="assets/img/stop.svg" />
+                    <span>
+                        Stop animation
+                    </span>
+                </button>
+            </div>
         </div>
 
         <!-- The javascript will load the wheel items dynamically --->

@@ -115,6 +115,7 @@ class Controller {
 
     // When a wheel item is hovered, its name appears at the center of the wheel
     private handleItemHover(item: WheelItem) {
+        $('#current-wheelitem-name').css('visibility', 'visible');
         $('#current-wheelitem-name').text(item.text);
     }
 
@@ -156,6 +157,10 @@ class Controller {
         this.animationDataProvider.OnEscape.on(()=>{
             this.handleEditCancel();
         });
+    }
+
+    private handleStopAnimation() {
+        this.animationDataProvider.stopAnimation();
     }
 
     private createWheelItemContainerFromTemplate(wheelItem: WheelItem): JQuery<HTMLElement> {
@@ -207,6 +212,8 @@ class Controller {
 
         // Vertically center the text label that displays the current item's text
         $('.current-wheelitem').css('top', `${containerDiameter / 2}px`);
+        $('.current-wheelitem').show();
+        $('#stop-anim-btn').click(() => { this.handleStopAnimation(); });
 
         const wheel = new AnimationWheel(wheelContainer.width() / 2);
         wheel.addItems(items).forEach(wheelItem => {

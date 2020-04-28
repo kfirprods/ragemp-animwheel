@@ -39,6 +39,10 @@ mp.events.add('PlayAnimation', function (player, action) {
     }
     player.playAnimation(animData.rageDictKey, animData.rageDictValue, 2, animData.animFlag);
 });
+// Server's endpoint for letting the client stop animations
+mp.events.add('StopAnimation', function (player) {
+    player.stopAnimation();
+});
 // Server's endpoint for letting users edit their favorites
 mp.events.add('UpdateFavoriteAnimation', function (player, slot, animationActionName) {
     var updatedAnimData = getAnimDataByActionName(animationActionName);
